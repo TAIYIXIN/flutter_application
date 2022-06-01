@@ -41,7 +41,7 @@ class _calendarState extends State<calendar> {
   
  
   Future loadCalendarData()async{
-    final String jsonString = await rootBundle.loadString("/jsons/C-B0024-001.json") ;
+    final String jsonString = await rootBundle.loadString("jsons/C-B0024-001.json") ;
     final dynamic jsonReponse =jsonDecode(jsonString);
 
     
