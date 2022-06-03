@@ -60,7 +60,7 @@ class overviewpage extends StatelessWidget {
           
           ListView(
             children: [
-              overviewcardsLargeScreen(),
+              // overviewcardsLargeScreen(),
               calendarAddChart(),
               RevenueSectionLarge(),
             ],

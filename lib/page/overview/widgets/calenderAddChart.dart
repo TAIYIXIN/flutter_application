@@ -15,7 +15,6 @@ import 'package:flutter_practice/page/overview/widgets/provider_.dart';
 import 'package:flutter_practice/widgets/custom_text.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-
 import '../model/chartModel.dart';
 import 'calendar.dart';
 
@@ -42,29 +41,24 @@ class _calendarAddChartState extends State<calendarAddChart> {
     var stationPressure=getCalendarData(jsonReponse,"stationPressure");
     var precipitation=getCalendarData(jsonReponse,"precipitation");
 
-    var a=-1;
+    // var a=-1;
 
     for(Map<String,dynamic> i in temp ){
-      a++;
+      // a++;
       i['time']=DateTime.parse(i['time']);
-      i['value']=double.parse(i['value']);
       i['time']='${i['time'].month}/${i['time'].day}\n${i['time'].hour}點';
-      
       TempList.add(ChartData.fromJson(i));
-      // print(TempList[a].time);
+
     }
     
     
     for(Map<String,dynamic> i in stationPressure ){
       i['time']=DateTime.parse(i['time']);
-      i['value']=double.parse(i['value']);
       i['time']='${i['time'].month}/${i['time'].day}\n${i['time'].hour}點';
-
       stationPressureList.add(ChartData.fromJson(i));
     }
     for(Map<String,dynamic> i in precipitation ){
       i['time']=DateTime.parse(i['time']);
-      i['value']=double.parse(i['value']);
       i['time']='${i['time'].month}/${i['time'].day}\n${i['time'].hour}點';
       precipitationList.add(ChartData.fromJson(i));
     }    
@@ -78,26 +72,53 @@ class _calendarAddChartState extends State<calendarAddChart> {
     var dataLenth=content.length;
 
 
-
-
+    var count=0;
+    double sum=0;
     for(int i=0 ;i<dataLenth ; i++){
       var time=content[i]['dataTime'];
 
       if(key =="temp"){
-        var temp =content[i]['weatherElements']['temperature'];
-        ListMapData.add({"time":time,"value":temp});
+        var temp =double.parse(content[i]['weatherElements']['temperature'])  ;
+        sum=sum+temp;
+        count++;
+        if(count==6){
+          sum=sum/6;
+          count=0;
+        ListMapData.add({"time":time,"value":sum});
+
+        }
+
+        
       }
       if(key =="stationPressure"){
-        var stationPressure=content[i]['weatherElements']['stationPressure'];
-        ListMapData.add({"time":time,"value":stationPressure});
+        var stationPressure=double.parse(content[i]['weatherElements']['stationPressure']) ;
+
+          sum=sum+stationPressure;
+          count++;
+          if(count==6){
+            count=0;
+            sum=sum/6;
+             ListMapData.add({"time":time,"value":sum});
+          }
+       
 
       }
       if(key == "precipitation"){
-        var precipitation=content[i]['weatherElements']['precipitation'];
+        var precipitation= content[i]['weatherElements']['precipitation'];
         if(precipitation=='T' || precipitation=='0.0'){
           precipitation='0';
         }
-        ListMapData.add({"time":time,"value":precipitation});
+        sum=sum+double.parse(precipitation) ;
+        count++;
+        if(count==6){
+          count=0;
+          sum=sum/6;
+          ListMapData.add({"time":time,"value":sum});
+        }
+        
+
+
+        
       }
     }
     return ListMapData;
@@ -125,31 +146,21 @@ class _calendarAddChartState extends State<calendarAddChart> {
   provider myprovider =Provider.of<provider>(context);
   double _width=MediaQuery.of(context).size.width;
 
-  ChartSeriesController? chartSeriesController0;
-  ChartSeriesController? chartSeriesController1;
-  ChartSeriesController? chartSeriesController2;
 
   myprovider.AddPrecipitationData(precipitationList);
   myprovider.AddStationPressureData(stationPressureList);
   myprovider.AddTempData(TempList);
 
-
+ 
 
 
 
     return Consumer(builder: ((context,provider Chartdata, child) {
-        
+
       return Expanded(
         child:
           SfCartesianChart(
-    
-            onLegendTapped: (LegendTapArgs args) {
-                args.series.dataSource.add(ChartData('6/4', 25));
-                
-                args.series.isVisible(false) ;
-                
-            },
-           
+            
                       
             legend:Legend(
               isVisible: true,
@@ -165,8 +176,9 @@ class _calendarAddChartState extends State<calendarAddChart> {
                 enableMouseWheelZooming: true,
                 enableSelectionZooming: true,
                 enablePanning: true,
-                maximumZoomLevel: 0.7
+                maximumZoomLevel: 0.3
               ),
+         
               title: ChartTitle(
               text: "過去30天的天氣統整",
     
@@ -185,35 +197,30 @@ class _calendarAddChartState extends State<calendarAddChart> {
                 decimalPlaces: 0,
               ),
               primaryXAxis: CategoryAxis(
-                interval: 30
-              ),
-                // series:           
-                series:<ChartSeries>[
+                interval: 10,
+              ),        
+                series:<ChartSeries>[        
                   LineSeries<ChartData,String>(
-                 name: 'TempValue',
+                 name: '平均溫度',
                  dataSource: Chartdata.TempData, 
                  xValueMapper: (ChartData data,_)=>data.time, 
                  yValueMapper: (ChartData data,_)=>data.value,
                  isVisible: true
-
                 ),                 
                 LineSeries<ChartData,String>(
-                 name: 'RainValue',
+                 name: '平均降雨量',
                  dataSource:Chartdata.PrecipitationData,
                  xValueMapper: (ChartData data,_)=>data.time, 
                  yValueMapper: (ChartData data,_)=>data.value,
-                 onRendererCreated:(ChartSeriesController controller){
-                    chartSeriesController1 = controller;
-                 }
+                  isVisible: false
                  ),
                 LineSeries<ChartData,String>(
-                 name: 'StationPressure',
+                 name: '平均氣壓',
                  dataSource: Chartdata.StationPressureData,
                  xValueMapper: (ChartData data,_)=>data.time, 
                  yValueMapper: (ChartData data,_)=>data.value, 
-                 onRendererCreated:(ChartSeriesController controller){
-                 chartSeriesController2 = controller;
-                  }
+                isVisible: false
+
                   )
                 ]
           )
