@@ -19,7 +19,12 @@ class overviewcardsLargeScreen extends StatelessWidget {
 
       children: [
 
-        
+        InfoCard(
+          title: "date", 
+          value: "6/4", 
+          topColor: Colors.orange, 
+          isActive: true, 
+          onTap: (){}),
 
           SizedBox(width: _width/64,),
           InfoCard(
